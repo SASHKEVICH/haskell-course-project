@@ -1,21 +1,14 @@
-module Main where
+module Main (main) where
 
-import Plants
+import Diseases
 
-foo :: Plant -> String
-foo plant = show plant
+import Data.Aeson
+import Text.Show.Unicode (uprint)
 
 main :: IO ()
 main = do
-  putStrLn "Hello, Haskell!"
+  d <- (eitherDecode <$> getJSON) :: IO (Either String DiseasesJSON)
 
-  print $ foo Plant { 
-    plant_id = 1, 
-    russian_name = "Something", 
-    latin_name = "",
-    price = 123,
-    information = "",
-    growing_area = [],
-    contraindications = [],
-    diseases = []
-    }
+  case d of
+    Left err -> putStrLn err
+    Right ps -> uprint ps
