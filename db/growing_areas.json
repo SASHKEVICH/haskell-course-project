@@ -1,0 +1,89 @@
+{
+    "growing_areas": [
+        {
+            "id": 1,
+            "russian_name": "Болото",
+            "location": "Юго-восточная Азия"
+        },
+        {
+            "id": 2,
+            "russian_name": "Болото",
+            "location": "Европейская Сибирь"
+        },
+        {
+            "id": 3,
+            "russian_name": "Пустыня",
+            "location": "Мадагаскар"
+        },
+        {
+            "id": 4,
+            "russian_name": "Пустыня",
+            "location": "Аравийский полуостров"
+        },
+        {
+            "id": 5,
+            "russian_name": "Хвойный лес",
+            "location": "Россия"
+        },
+        {
+            "id": 6,
+            "russian_name": "Тундра",
+            "location": "Россия"
+        },
+        {
+            "id": 7,
+            "russian_name": "Степь",
+            "location": "Кавказ"
+        },
+        {
+            "id": 8,
+            "russian_name": "Степь",
+            "location": "Турция"
+        },
+        {
+            "id": 9,
+            "russian_name": "Лесостепь",
+            "location": "Монголия"
+        },
+        {
+            "id": 10,
+            "russian_name": "Умеренный климат",
+            "location": "Северное полушарие"
+        },
+        {
+            "id": 11,
+            "russian_name": "Умеренный климат",
+            "location": "Южное полушарие"
+        },
+        {
+            "id": 12,
+            "russian_name": "Тропический климат",
+            "location": "Америка"
+        },
+        {
+            "id": 13,
+            "russian_name": "Субтропический климат",
+            "location": "Америка"
+        },
+        {
+            "id": 14,
+            "russian_name": "Лиственный лес",
+            "location": "Россия"
+        },
+        {
+            "id": 15,
+            "russian_name": "Берега озёр",
+            "location": "Европейская Сибирь"
+        },
+        {
+            "id": 16,
+            "russian_name": "Горная местность",
+            "location": "Алтай"
+        },
+        {
+            "id": 17,
+            "russian_name": "Равнинная местность",
+            "location": "Юго-восточная Европа"
+        }
+    ]
+}
