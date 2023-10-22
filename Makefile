@@ -1,6 +1,5 @@
 build:
 	./db/db_validate.sh ./db
-	cabal build
-
-run:
-	cabal run
+	
+# run:
+# 	cabal run
