@@ -1,4 +1,6 @@
-module Plants where
+module Plants (
+    
+) where
 
 data Plant = Plant { 
     plant_id :: Int, 
