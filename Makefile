@@ -1,5 +1,6 @@
 build:
 	./db/db_validate.sh ./db
+	stack build
 	
-# run:
-# 	cabal run
+run:
+	stack exec haskell-plants-exe

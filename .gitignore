@@ -1,7 +1,7 @@
 .DS_Store
 .vscode
 
-dist-newstyle
+.stack-work
 
 *.hi
 *.bin
