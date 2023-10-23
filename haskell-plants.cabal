@@ -26,7 +26,6 @@ source-repository head
 library
   exposed-modules:
       Diseases
-      Lib
       Plants
   other-modules:
       Paths_haskell_plants
