@@ -24,6 +24,7 @@ dependencies:
 - bytestring
 - aeson
 - unicode-show
+- ansi-terminal
 
 ghc-options:
 - -Wall
