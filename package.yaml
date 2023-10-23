@@ -41,6 +41,7 @@ library:
   source-dirs: 
   - src
   - db
+  - src/components
 
 executables:
   haskell-plants-exe:
