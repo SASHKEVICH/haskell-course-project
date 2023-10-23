@@ -27,6 +27,7 @@ library
   exposed-modules:
       Diseases
       Plants
+      TryAgain
   other-modules:
       Paths_haskell_plants
   autogen-modules:
