@@ -8,26 +8,30 @@ module Diseases (
 
 import Prelude hiding (id) 
 import Data.Aeson
-import GHC.Generics
+import Data.List (find)
+import GHC.Generics ( Generic )
 import Text.Show.Unicode (uprint)
 import Text.Read
 import System.Exit (exitSuccess)
 import qualified Data.ByteString.Lazy as B
 
 import TryAgain (tryAgain)
+import Plants
 
 -- Declarations
 
-data Reciept = Reciept
+data RecieptItem = Reciept
   { plant_id :: Int
   , amount :: Float
   } deriving (Show, Generic)
+
+type Reciept = [RecieptItem]
 
 data Disease = Disease 
   { id :: Int
   , russian_name :: String
   , latin_name :: String
-  , reciept :: [Reciept]
+  , reciept :: Reciept
   , duration :: Int    
   } deriving (Show, Generic)
 
@@ -35,7 +39,7 @@ newtype DiseasesJSON = DiseasesJSON
   { diseases :: [Disease]
   } deriving (Show, Generic)
 
-instance FromJSON Reciept
+instance FromJSON RecieptItem
 instance FromJSON Disease
 instance FromJSON DiseasesJSON
 
@@ -105,7 +109,14 @@ tryCalculateTreatmentCourseFlow disease_id = do
 
   case maybeDisease of 
     Just disease -> do
-      uprint disease
+      let plantsIds = getPlantsIdsFromReciept $ reciept disease
+      healthyPlants <- getPlantsByIds plantsIds
+
+      let treatmentCourcePrice = calculateTreatmentCourse (reciept disease) healthyPlants
+
+      putStrLn "Лекарственные растения:\n"
+      uprint healthyPlants
+      uprint $ "Стоимость: " ++ show treatmentCourcePrice ++ "усл/ед"
     
     Nothing -> do
       putStrLn "Болезни с таким id не существует"
@@ -117,13 +128,17 @@ findDiseaseWithId :: Int -> IO (Maybe Disease)
 findDiseaseWithId disease_id = do
   allDiseases <- getAllDiseases
 
-  let filteredDiseases = filterDiseasesWithId allDiseases disease_id
+  let filteredDiseases = find (\disease -> id disease == disease_id) allDiseases
   return filteredDiseases
 
 
-filterDiseasesWithId :: [Disease] -> Int -> Maybe Disease
-filterDiseasesWithId allDiseases disease_id
-  | null filteredDiseases = Nothing
-  | otherwise = Just (head filteredDiseases)
+getPlantsIdsFromReciept :: Reciept -> [Int]
+getPlantsIdsFromReciept recieptArray =
+  [ plant_id reciept_element | reciept_element <- recieptArray ]
+
+
+calculateTreatmentCourse :: Reciept -> [Maybe Plant] -> Float
+calculateTreatmentCourse recieptArray recieptPlants =
+  foldl (\acc x -> fromIntegral (fst x) * snd x + acc) 0.0 priceAmountArray
   where 
-    filteredDiseases = filter (\disease -> id disease == disease_id) allDiseases
+    priceAmountArray = zip [ price plant | Just plant <- recieptPlants ] [ amount recieptItem | recieptItem <- recieptArray ]
