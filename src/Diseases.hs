@@ -45,7 +45,6 @@ instance FromJSON DiseasesJSON
 
 -- Functions
 
-
 jsonFile :: FilePath
 jsonFile = "./db/diseases.json"
 
@@ -95,17 +94,17 @@ calculateTreatmentCourseFlow = do
 
   decision <- getLine
 
-  let disease_id = readMaybe decision :: Maybe Int
-  case disease_id of
-    Just just_disease_id -> tryCalculateTreatmentCourseFlow just_disease_id
+  let diseaseId = readMaybe decision :: Maybe Int
+  case diseaseId of
+    Just diseaseId -> tryCalculateTreatmentCourseFlow diseaseId
 
     Nothing -> do
       putStrLn "Введите число"
       calculateTreatmentCourseFlow
 
 tryCalculateTreatmentCourseFlow :: Int -> IO ()
-tryCalculateTreatmentCourseFlow disease_id = do
-  maybeDisease <- findDiseaseWithId disease_id
+tryCalculateTreatmentCourseFlow diseaseId = do
+  maybeDisease <- findDiseaseWithId diseaseId
 
   case maybeDisease of 
     Just disease -> do
@@ -125,16 +124,16 @@ tryCalculateTreatmentCourseFlow disease_id = do
 
 
 findDiseaseWithId :: Int -> IO (Maybe Disease)
-findDiseaseWithId disease_id = do
+findDiseaseWithId diseaseId = do
   allDiseases <- getAllDiseases
 
-  let filteredDiseases = find (\disease -> id disease == disease_id) allDiseases
+  let filteredDiseases = find (\disease -> id disease == diseaseId) allDiseases
   return filteredDiseases
 
 
 getPlantsIdsFromReciept :: Reciept -> [Int]
 getPlantsIdsFromReciept recieptArray =
-  [ plant_id reciept_element | reciept_element <- recieptArray ]
+  [ plant_id recieptItem | recieptItem <- recieptArray ]
 
 
 calculateTreatmentCourse :: Reciept -> [Maybe Plant] -> Float

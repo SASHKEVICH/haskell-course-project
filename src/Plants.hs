@@ -62,4 +62,4 @@ getPlantsByIds ids = do
 
 findPlantsByIds :: [Plant] -> [Int] -> [Maybe Plant]
 findPlantsByIds allPlants ids =
-  [ find (\plant -> id plant == plant_id) allPlants | plant_id <- ids ]
+  [ find (\plant -> id plant == plantId) allPlants | plantId <- ids ]
