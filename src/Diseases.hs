@@ -6,16 +6,16 @@ module Diseases (
 
 -- Imports
 
-import Prelude hiding (id) 
+import Prelude hiding ( id )
 import Data.Aeson
-import Data.List (find)
+import Data.List ( find )
 import GHC.Generics ( Generic )
-import Text.Show.Unicode (uprint)
+import Text.Show.Unicode ( uprint )
 import Text.Read
-import System.Exit (exitSuccess)
+import System.Exit ( exitSuccess )
 import qualified Data.ByteString.Lazy as B
 
-import TryAgain (tryAgain)
+import TryAgain ( tryAgain )
 import Plants
 
 -- Declarations
@@ -73,7 +73,7 @@ showAllDiseases = do
 mainMenu :: IO ()
 mainMenu = do
   putStrLn "\nМеню:"
-  putStrLn "1. Показать заболевания"
+  putStrLn "1. Показать лекарственные растения"
   putStrLn "2. Вычислить стоимость курса лечения"
   putStrLn "3. Выйти в начало"
   putStrLn "4. Выйти из программы"
@@ -81,12 +81,26 @@ mainMenu = do
   decision <- getLine
 
   case decision of
-    "1" -> exitSuccess
+    "1" -> showPlantsTreatingDiseaseFlow
     "2" -> calculateTreatmentCourseFlow
     "3" -> exitSuccess
     "4" -> exitSuccess
     _ -> tryAgain mainMenu
 
+
+showPlantsTreatingDiseaseFlow :: IO ()
+showPlantsTreatingDiseaseFlow = do
+  putStrLn "Введите id заболевания:"
+
+  decision <- getLine
+
+  let diseaseId = readMaybe decision :: Maybe Int
+  case diseaseId of
+    Just diseaseId -> showPlantsTreatingDisease diseaseId
+
+    Nothing -> do
+      putStrLn "Введите число"
+      calculateTreatmentCourseFlow
 
 calculateTreatmentCourseFlow :: IO ()
 calculateTreatmentCourseFlow = do
