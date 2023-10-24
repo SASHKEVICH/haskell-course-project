@@ -1,14 +1,24 @@
 module Main (main) where
 
-import Diseases
+import System.Exit (exitSuccess)
 
-import Data.Aeson
-import Text.Show.Unicode (uprint)
+import Diseases (showAllDiseases)
+import TryAgain (tryAgain)
 
 main :: IO ()
 main = do
-  d <- (eitherDecode <$> getJSON) :: IO (Either String DiseasesJSON)
+  putStrLn "\nПрограмма \"Аптека лекарственных растений\""
+  menu
 
-  case d of
-    Left err -> putStrLn err
-    Right ps -> uprint ps
+menu :: IO ()
+menu = do
+  putStrLn "\nМеню:"
+  putStrLn "1. Показать заболевания"
+  putStrLn "2. Выход из программы"
+
+  decision <- getLine
+
+  case decision of
+    "1" -> showAllDiseases
+    "2" -> exitSuccess
+    _ -> tryAgain menu
