@@ -111,11 +111,11 @@ tryCalculateTreatmentCourseFlow diseaseId = do
       let plantsIds = getPlantsIdsFromReciept $ reciept disease
       healthyPlants <- getPlantsByIds plantsIds
 
-      let treatmentCourcePrice = calculateTreatmentCourse (reciept disease) healthyPlants
+      let treatmentCourcePrice = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
 
       putStrLn "Лекарственные растения:\n"
       uprint healthyPlants
-      uprint $ "Стоимость: " ++ show treatmentCourcePrice ++ "усл/ед"
+      uprint $ "Стоимость: " ++ show treatmentCourcePrice ++ " усл/ед"
     
     Nothing -> do
       putStrLn "Болезни с таким id не существует"
@@ -136,8 +136,8 @@ getPlantsIdsFromReciept recieptArray =
   [ plant_id recieptItem | recieptItem <- recieptArray ]
 
 
-calculateTreatmentCourse :: Reciept -> [Maybe Plant] -> Float
-calculateTreatmentCourse recieptArray recieptPlants =
-  foldl (\acc x -> fromIntegral (fst x) * snd x + acc) 0.0 priceAmountArray
+calculateTreatmentCourse :: Reciept -> [Maybe Plant] -> Int -> Float
+calculateTreatmentCourse recieptArray recieptPlants treatmentDuration =
+  foldl (\acc x -> fromIntegral (fst x) * snd x + acc) 0.0 priceAmountArray * fromIntegral treatmentDuration
   where 
     priceAmountArray = zip [ price plant | Just plant <- recieptPlants ] [ amount recieptItem | recieptItem <- recieptArray ]
