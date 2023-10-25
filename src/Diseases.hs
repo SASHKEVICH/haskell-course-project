@@ -96,7 +96,7 @@ showPlantsTreatingDiseaseFlow = do
 
   let diseaseId = readMaybe decision :: Maybe Int
   case diseaseId of
-    Just diseaseId -> showPlantsTreatingDisease diseaseId
+    Just realDiseaseId -> showPlantsTreatingDisease realDiseaseId
 
     Nothing -> do
       putStrLn "Введите число"
@@ -110,7 +110,7 @@ calculateTreatmentCourseFlow = do
 
   let diseaseId = readMaybe decision :: Maybe Int
   case diseaseId of
-    Just diseaseId -> tryCalculateTreatmentCourseFlow diseaseId
+    Just realDiseaseId -> tryCalculateTreatmentCourseFlow realDiseaseId
 
     Nothing -> do
       putStrLn "Введите число"

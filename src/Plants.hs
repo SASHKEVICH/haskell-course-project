@@ -12,7 +12,8 @@ import Prelude hiding ( id )
 import Data.List ( find )
 import Data.Aeson
 import GHC.Generics
-import Text.Show.Unicode ( uprint )
+import Text.Show.Unicode ( uprint, ushow )
+import Text.Read
 import System.Exit ( exitSuccess )
 import qualified Data.ByteString.Lazy as B
 
@@ -99,7 +100,42 @@ mainMenu = do
   decision <- getLine
 
   case decision of
-    "1" -> exitSuccess
+    "1" -> showInformationAboutPlantFlow
     "2" -> exitSuccess
     "3" -> exitSuccess
+    "4" -> exitSuccess
     _ -> tryAgain mainMenu
+
+
+showInformationAboutPlantFlow :: IO ()
+showInformationAboutPlantFlow = do
+  putStrLn "Введите id растения:\n"
+
+  decision <- getLine
+
+  let plantId = readMaybe decision :: Maybe Int
+  case plantId of
+    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
+    Nothing -> do
+      putStrLn "Введите число"
+      showInformationAboutPlantFlow
+
+
+tryShowInformationAboutPlantFlow :: Int -> IO ()
+tryShowInformationAboutPlantFlow plantId = do
+  maybePlant <- findPlantWithId plantId
+
+  case maybePlant of
+    Just plant -> do
+      uprint $ "Искомое растение: " ++ ushow plant
+
+    Nothing -> do
+      putStrLn "Растения с таким id не существует"
+
+  mainMenu
+
+
+findPlantWithId :: Int -> IO (Maybe Plant)
+findPlantWithId plantId = do
+  plantsById <- getPlantsByIds [plantId]
+  return $ head plantsById
