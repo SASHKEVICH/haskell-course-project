@@ -16,9 +16,9 @@ import GHC.Generics
 import Text.Show.Unicode ( uprint, ushow )
 import Text.Read
 import System.Exit ( exitSuccess )
-import qualified Data.ByteString.Lazy as B
 
 import TryAgain ( tryAgain )
+import GetJSON ( decodeJson )
 
 -- Declarations
 
@@ -45,14 +45,9 @@ instance FromJSON PlantsJSON
 jsonFile :: FilePath
 jsonFile = "./db/plants.json"
 
-
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
-
-
 getAllPlants :: IO [Plant]
 getAllPlants = do
-  decodedPlantsJSON <- (decode <$> getJSON) :: IO (Maybe PlantsJSON)
+  decodedPlantsJSON <- decodeJson jsonFile :: IO(Maybe PlantsJSON)
 
   case decodedPlantsJSON of
     Just plantsJson -> return $ plants plantsJson

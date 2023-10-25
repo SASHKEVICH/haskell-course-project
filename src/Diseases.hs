@@ -15,6 +15,7 @@ import Text.Read
 import System.Exit ( exitSuccess )
 import qualified Data.ByteString.Lazy as B
 
+import GetJSON ( decodeJson )
 import TryAgain ( tryAgain )
 import Plants
 
@@ -49,13 +50,9 @@ jsonFile :: FilePath
 jsonFile = "./db/diseases.json"
 
 
-getJSON :: IO B.ByteString
-getJSON = B.readFile jsonFile
-
-
 getAllDiseases :: IO [Disease]
 getAllDiseases = do
-  decodedDiseasesJSON <- (decode <$> getJSON) :: IO (Maybe DiseasesJSON)
+  decodedDiseasesJSON <- decodeJson jsonFile :: IO (Maybe DiseasesJSON)
 
   case decodedDiseasesJSON of
     Just diseasesJson -> return $ diseases diseasesJson

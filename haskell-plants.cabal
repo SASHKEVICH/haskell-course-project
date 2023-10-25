@@ -29,6 +29,7 @@ library
       Diseases
       GrowingAreas
       Plants
+      GetJSON
       TryAgain
   other-modules:
       Paths_haskell_plants
