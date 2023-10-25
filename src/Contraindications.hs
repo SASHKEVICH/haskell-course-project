@@ -1,13 +1,17 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Contraindications (
-
+  getContraindicationsByIds
 ) where
 
 -- Imports
 
+import Prelude hiding ( id )
 import GHC.Generics
 import Data.Aeson
+import Data.List ( find )
+
+import GetJSON ( decodeJson )
 
 -- Declararations
 
@@ -27,4 +31,26 @@ instance FromJSON ContraindicationsJSON
 
 -- Functions
 
+jsonFile :: FilePath
+jsonFile = "./db/contraindications.json"
+
+
+getAllContraindications :: IO [Contraindication]
+getAllContraindications = do
+  decodedContraindicationsJSON <- decodeJson jsonFile :: IO(Maybe ContraindicationsJSON)
+
+  case decodedContraindicationsJSON of
+    Just contraindicationsJSON -> return $ contraindications contraindicationsJSON
+    Nothing -> return []
+
+
+getContraindicationsByIds :: [Int] -> IO [Maybe Contraindication]
+getContraindicationsByIds ids = do
+  allContraindications <- getAllContraindications
+  return $ findContraindicationsByIds allContraindications ids
+
+
+findContraindicationsByIds :: [Contraindication] -> [Int] -> [Maybe Contraindication]
+findContraindicationsByIds allContraindications ids =
+  [ find (\contraindication -> id contraindication == contraindicationId) allContraindications | contraindicationId <- ids ]
 

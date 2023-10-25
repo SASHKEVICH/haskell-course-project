@@ -13,7 +13,6 @@ import GHC.Generics ( Generic )
 import Text.Show.Unicode ( uprint )
 import Text.Read
 import System.Exit ( exitSuccess )
-import qualified Data.ByteString.Lazy as B
 
 import GetJSON ( decodeJson )
 import TryAgain ( tryAgain )

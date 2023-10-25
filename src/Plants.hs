@@ -19,6 +19,8 @@ import System.Exit ( exitSuccess )
 
 import TryAgain ( tryAgain )
 import GetJSON ( decodeJson )
+import Contraindications ( getContraindicationsByIds )
+import GrowingAreas ( getAreasByIds )
 
 -- Declarations
 
@@ -124,6 +126,12 @@ tryShowInformationAboutPlantFlow plantId = do
   case maybePlant of
     Just plant -> do
       uprint $ "Искомое растение: " ++ ushow plant
+
+      plantContraindications <- getContraindicationsByIds $ contraindications plant
+      uprint $ "Противопоказания: " ++ ushow plantContraindications
+
+      plantGrowingAreas <- getAreasByIds $ growing_area plant
+      uprint $ "Ареалы произрастания: " ++ ushow plantGrowingAreas
 
     Nothing -> do
       putStrLn "Растения с таким id не существует"
