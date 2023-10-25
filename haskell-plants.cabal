@@ -25,7 +25,9 @@ source-repository head
 
 library
   exposed-modules:
+      Contraindications
       Diseases
+      GrowingAreas
       Plants
       TryAgain
   other-modules:
