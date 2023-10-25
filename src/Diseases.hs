@@ -69,7 +69,7 @@ showAllDiseases = do
 mainMenu :: IO ()
 mainMenu = do
   putStrLn "\nМеню:"
-  putStrLn "1. Показать лекарственные растения"
+  putStrLn "1. Показать лекарственные растения для этого заболевания"
   putStrLn "2. Вычислить стоимость курса лечения"
   putStrLn "3. Выйти в начало"
   putStrLn "4. Выйти из программы"

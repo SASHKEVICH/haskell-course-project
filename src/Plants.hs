@@ -10,7 +10,7 @@ module Plants (
 -- Imports
 
 import Prelude hiding ( id )
-import Data.List ( find )
+import Data.List ( find, sortBy )
 import Data.Aeson
 import GHC.Generics
 import Text.Show.Unicode ( uprint, ushow )
@@ -76,7 +76,7 @@ showPlantsTreatingDisease diseaseId = do
   let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
   uprint plantsTreatingDisease
 
-  mainMenu
+  mainMenu plantsTreatingDisease
 
 
 findAllPlantsTreatingDisease :: [Plant] -> Int -> [Plant]
@@ -86,8 +86,8 @@ findAllPlantsTreatingDisease allPlants diseaseId =
     doesPlantTreatDisease plant = elem diseaseId $ diseases plant
 
 
-mainMenu :: IO ()
-mainMenu = do
+mainMenu :: [Plant] -> IO ()
+mainMenu plantsTreatingDisease = do
   putStrLn "\nМеню:"
   putStrLn "1. Показать полную информацию о растении"
   putStrLn "2. Отсортировать растения по цене"
@@ -98,29 +98,37 @@ mainMenu = do
   decision <- getLine
 
   case decision of
-    "1" -> showInformationAboutPlantFlow
-    "2" -> exitSuccess
-    "3" -> exitSuccess
+    "1" -> showInformationAboutPlantFlow plantsTreatingDisease
+
+    "2" -> do
+      let compareCondition lt rt = if price lt > price rt then GT else LT
+      showSortedPlantsFlow compareCondition plantsTreatingDisease
+
+    "3" -> do
+      let compareCondition lt rt = if price lt > price rt then GT else LT
+      showSortedPlantsFlow compareCondition plantsTreatingDisease
+
     "4" -> exitSuccess
-    _ -> tryAgain mainMenu
+    "5" -> exitSuccess
+    _ -> tryAgain $ mainMenu plantsTreatingDisease
 
 
-showInformationAboutPlantFlow :: IO ()
-showInformationAboutPlantFlow = do
+showInformationAboutPlantFlow :: [Plant] -> IO ()
+showInformationAboutPlantFlow plantsTreatingDisease = do
   putStrLn "Введите id растения:\n"
 
   decision <- getLine
 
   let plantId = readMaybe decision :: Maybe Int
   case plantId of
-    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
+    Just realPlantId -> tryShowInformationAboutPlantFlow plantsTreatingDisease realPlantId
     Nothing -> do
       putStrLn "Введите число"
-      showInformationAboutPlantFlow
+      showInformationAboutPlantFlow plantsTreatingDisease
 
 
-tryShowInformationAboutPlantFlow :: Int -> IO ()
-tryShowInformationAboutPlantFlow plantId = do
+tryShowInformationAboutPlantFlow :: [Plant] -> Int -> IO ()
+tryShowInformationAboutPlantFlow plantsTreatingDisease plantId = do
   maybePlant <- findPlantWithId plantId
 
   case maybePlant of
@@ -136,10 +144,19 @@ tryShowInformationAboutPlantFlow plantId = do
     Nothing -> do
       putStrLn "Растения с таким id не существует"
 
-  mainMenu
+  mainMenu plantsTreatingDisease
 
 
 findPlantWithId :: Int -> IO (Maybe Plant)
 findPlantWithId plantId = do
   plantsById <- getPlantsByIds [plantId]
   return $ head plantsById
+
+
+showSortedPlantsFlow :: (Plant -> Plant -> Ordering) -> [Plant] -> IO ()
+showSortedPlantsFlow compareCondition plantsTreatingDisease = do
+  let sortedPlants = sortBy compareCondition plantsTreatingDisease
+  uprint $ ushow sortedPlants
+
+  mainMenu plantsTreatingDisease
+
