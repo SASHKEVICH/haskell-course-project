@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Diseases (
-  showAllDiseases
+  getAllDiseases
+  , calculateTreatmentCourseFlow
 ) where
 
 -- Imports
@@ -10,13 +11,11 @@ import Prelude hiding ( id )
 import Data.Aeson
 import Data.List ( find )
 import GHC.Generics ( Generic )
-import Text.Show.Unicode ( uprint )
+import Text.Show.Unicode ( uprint, ushow )
 import Text.Read
-import System.Exit ( exitSuccess )
 
 import GetJSON ( decodeJson )
-import TryAgain ( tryAgain )
-import Plants
+import Plants ( Plant(..), getPlantsByIds )
 
 -- Declarations
 
@@ -58,46 +57,6 @@ getAllDiseases = do
     Nothing -> return []
 
 
-showAllDiseases :: IO ()
-showAllDiseases = do 
-  allDiseases <- getAllDiseases
-  uprint allDiseases
-
-  mainMenu
-
-
-mainMenu :: IO ()
-mainMenu = do
-  putStrLn "\nМеню:"
-  putStrLn "1. Показать лекарственные растения для этого заболевания"
-  putStrLn "2. Вычислить стоимость курса лечения"
-  putStrLn "3. Выйти в начало"
-  putStrLn "4. Выйти из программы"
-
-  decision <- getLine
-
-  case decision of
-    "1" -> showPlantsTreatingDiseaseFlow
-    "2" -> calculateTreatmentCourseFlow
-    "3" -> exitSuccess
-    "4" -> exitSuccess
-    _ -> tryAgain mainMenu
-
-
-showPlantsTreatingDiseaseFlow :: IO ()
-showPlantsTreatingDiseaseFlow = do
-  putStrLn "Введите id заболевания:"
-
-  decision <- getLine
-
-  let diseaseId = readMaybe decision :: Maybe Int
-  case diseaseId of
-    Just realDiseaseId -> showPlantsTreatingDisease realDiseaseId
-
-    Nothing -> do
-      putStrLn "Введите число"
-      calculateTreatmentCourseFlow
-
 calculateTreatmentCourseFlow :: IO ()
 calculateTreatmentCourseFlow = do
   putStrLn "Введите id заболевания:"
@@ -112,6 +71,7 @@ calculateTreatmentCourseFlow = do
       putStrLn "Введите число"
       calculateTreatmentCourseFlow
 
+
 tryCalculateTreatmentCourseFlow :: Int -> IO ()
 tryCalculateTreatmentCourseFlow diseaseId = do
   maybeDisease <- findDiseaseWithId diseaseId
@@ -124,13 +84,11 @@ tryCalculateTreatmentCourseFlow diseaseId = do
       let treatmentCourcePrice = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
 
       putStrLn "Лекарственные растения:\n"
-      uprint healthyPlants
+      uprint $ ushow healthyPlants
       uprint $ "Стоимость: " ++ show treatmentCourcePrice ++ " усл/ед"
     
     Nothing -> do
       putStrLn "Болезни с таким id не существует"
-      
-  mainMenu
 
 
 findDiseaseWithId :: Int -> IO (Maybe Disease)

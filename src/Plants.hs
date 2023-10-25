@@ -1,10 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Plants (
-  Plant,
-  price,
-  getPlantsByIds,
-  showPlantsTreatingDisease
+  Plant
+  , price
+  , getPlantsByIds
+  , getAllPlants
+  , findAllPlantsTreatingDisease
+  , showInformationAboutPlantFlow
+  , showSortedPlantsFlow
 ) where
 
 -- Imports
@@ -15,9 +18,7 @@ import Data.Aeson
 import GHC.Generics
 import Text.Show.Unicode ( uprint, ushow )
 import Text.Read
-import System.Exit ( exitSuccess )
 
-import TryAgain ( tryAgain )
 import GetJSON ( decodeJson )
 import Contraindications ( getContraindicationsByIds )
 import GrowingAreas ( getAreasByIds )
@@ -47,6 +48,7 @@ instance FromJSON PlantsJSON
 jsonFile :: FilePath
 jsonFile = "./db/plants.json"
 
+
 getAllPlants :: IO [Plant]
 getAllPlants = do
   decodedPlantsJSON <- decodeJson jsonFile :: IO(Maybe PlantsJSON)
@@ -69,48 +71,11 @@ findPlantsByIds allPlants ids =
   [ find (\plant -> id plant == plantId) allPlants | plantId <- ids ]
 
 
-showPlantsTreatingDisease :: Int -> IO ()
-showPlantsTreatingDisease diseaseId = do
-  allPlants <- getAllPlants
-
-  let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
-  uprint plantsTreatingDisease
-
-  mainMenu plantsTreatingDisease
-
-
 findAllPlantsTreatingDisease :: [Plant] -> Int -> [Plant]
 findAllPlantsTreatingDisease allPlants diseaseId =
   [ plant | plant <- allPlants, doesPlantTreatDisease plant ]
   where
     doesPlantTreatDisease plant = elem diseaseId $ diseases plant
-
-
-mainMenu :: [Plant] -> IO ()
-mainMenu plantsTreatingDisease = do
-  putStrLn "\nМеню:"
-  putStrLn "1. Показать полную информацию о растении"
-  putStrLn "2. Отсортировать растения по цене"
-  putStrLn "3. Отсортировать растения по ареалу произрастания"
-  putStrLn "4. Выйти в начало"
-  putStrLn "5. Выйти из программы"
-
-  decision <- getLine
-
-  case decision of
-    "1" -> showInformationAboutPlantFlow plantsTreatingDisease
-
-    "2" -> do
-      let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
-
-    "3" -> do
-      let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
-
-    "4" -> exitSuccess
-    "5" -> exitSuccess
-    _ -> tryAgain $ mainMenu plantsTreatingDisease
 
 
 showInformationAboutPlantFlow :: [Plant] -> IO ()
@@ -121,14 +86,14 @@ showInformationAboutPlantFlow plantsTreatingDisease = do
 
   let plantId = readMaybe decision :: Maybe Int
   case plantId of
-    Just realPlantId -> tryShowInformationAboutPlantFlow plantsTreatingDisease realPlantId
+    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
     Nothing -> do
       putStrLn "Введите число"
       showInformationAboutPlantFlow plantsTreatingDisease
 
 
-tryShowInformationAboutPlantFlow :: [Plant] -> Int -> IO ()
-tryShowInformationAboutPlantFlow plantsTreatingDisease plantId = do
+tryShowInformationAboutPlantFlow :: Int -> IO ()
+tryShowInformationAboutPlantFlow plantId = do
   maybePlant <- findPlantWithId plantId
 
   case maybePlant of
@@ -144,8 +109,6 @@ tryShowInformationAboutPlantFlow plantsTreatingDisease plantId = do
     Nothing -> do
       putStrLn "Растения с таким id не существует"
 
-  mainMenu plantsTreatingDisease
-
 
 findPlantWithId :: Int -> IO (Maybe Plant)
 findPlantWithId plantId = do
@@ -157,6 +120,3 @@ showSortedPlantsFlow :: (Plant -> Plant -> Ordering) -> [Plant] -> IO ()
 showSortedPlantsFlow compareCondition plantsTreatingDisease = do
   let sortedPlants = sortBy compareCondition plantsTreatingDisease
   uprint $ ushow sortedPlants
-
-  mainMenu plantsTreatingDisease
-
