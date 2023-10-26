@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Diseases (
+  Disease(..),
   getAllDiseases
   , calculateTreatmentCourseFlow
 ) where

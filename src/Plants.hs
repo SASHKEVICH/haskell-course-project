@@ -30,7 +30,7 @@ data Plant = Plant
     , latin_name :: String
     , russian_name :: String
     , price :: Int
-    ,  information :: String
+    , information :: String
     , growing_area :: [Int]
     , contraindications :: [Int]
     , diseases :: [Int]

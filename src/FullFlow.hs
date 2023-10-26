@@ -4,25 +4,28 @@ module FullFlow (
 
 -- Imports
 
+import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
-import Text.Show.Unicode
+import Text.Show.Unicode ( uprint )
 import Text.Read
+import System.Console.ANSI ( clearScreen )
 
 import Diseases ( getAllDiseases, calculateTreatmentCourseFlow )
-
 import Plants
   ( Plant(..),
     getAllPlants,
     findAllPlantsTreatingDisease,
     showInformationAboutPlantFlow,
     showSortedPlantsFlow )
-
 import TryAgain ( tryAgain )
+import BeautyPrinter ( printAllDiseases )
 
 -- Functions
 
 mainFlow :: IO ()
 mainFlow = do
+  clearScreen
+
   putStrLn "\n"
   putStrLn "Программа \"Аптека лекарственных растений\""
 
@@ -36,6 +39,7 @@ mainMenu = do
   putStrLn "1. Показать заболевания"
   putStrLn "2. Выход из программы"
 
+  hFlush stdout
   decision <- getLine
 
   case decision of
@@ -45,9 +49,13 @@ mainMenu = do
 
 
 showAllDiseasesFlow :: IO ()
-showAllDiseasesFlow = do 
+showAllDiseasesFlow = do
+  clearScreen
+
+  putStrLn "Список заболеваний:\n"
+
   allDiseases <- getAllDiseases
-  uprint allDiseases
+  printAllDiseases allDiseases
 
   diseasesMenu
 
