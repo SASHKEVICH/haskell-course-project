@@ -1,8 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Plants (
-  Plant
-  , price
+  Plant(..)
   , getPlantsByIds
   , getAllPlants
   , findAllPlantsTreatingDisease

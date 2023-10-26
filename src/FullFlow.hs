@@ -10,15 +10,21 @@ import Text.Show.Unicode ( uprint )
 import Text.Read
 import System.Console.ANSI ( clearScreen )
 
-import Diseases ( getAllDiseases, calculateTreatmentCourseFlow )
+import Diseases
+  ( Disease( reciept, duration ),
+    getAllDiseases,
+    findDiseaseWithId,
+    getPlantsIdsFromReciept,
+    calculateTreatmentCourse )
 import Plants
   ( Plant(..),
     getAllPlants,
     findAllPlantsTreatingDisease,
     showInformationAboutPlantFlow,
-    showSortedPlantsFlow )
+    showSortedPlantsFlow,
+    getPlantsByIds )
 import TryAgain ( tryAgain )
-import BeautyPrinter ( printAllDiseases )
+import BeautyPrinter ( printAllDiseases, printTreatmentCourse )
 
 -- Functions
 
@@ -80,6 +86,38 @@ diseasesMenu = do
     "4" -> mainFlow
     "5" -> exitSuccess
     _ -> tryAgain mainMenu
+
+
+calculateTreatmentCourseFlow :: IO ()
+calculateTreatmentCourseFlow = do
+  putStrLn "Введите id заболевания:"
+
+  hFlush stdout
+  decision <- getLine
+
+  let diseaseId = readMaybe decision :: Maybe Int
+  case diseaseId of
+    Just realDiseaseId -> tryCalculateTreatmentCourseFlow realDiseaseId
+
+    Nothing -> do
+      putStrLn "Введите число"
+      calculateTreatmentCourseFlow
+
+
+tryCalculateTreatmentCourseFlow :: Int -> IO ()
+tryCalculateTreatmentCourseFlow diseaseId = do
+  maybeDisease <- findDiseaseWithId diseaseId
+
+  case maybeDisease of
+    Just disease -> do
+      let plantsIds = getPlantsIdsFromReciept $ reciept disease
+      healthyPlants <- getPlantsByIds plantsIds
+
+      let treatmentCourseCost = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
+      printTreatmentCourse healthyPlants treatmentCourseCost (duration disease)
+
+    Nothing -> do
+      putStrLn "Болезни с таким id не существует"
 
 
 requestShowPlantsTreatingDiseaseFlow :: IO ()
