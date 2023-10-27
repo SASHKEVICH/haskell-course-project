@@ -4,25 +4,39 @@ module FullFlow (
 
 -- Imports
 
+import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
-import Text.Show.Unicode
-import Text.Read
+import Text.Read ( readMaybe )
+import System.Console.ANSI ( clearScreen )
+import Data.List ( sortBy )
 
-import Diseases ( getAllDiseases, calculateTreatmentCourseFlow )
-
+import Diseases
+  ( Disease( reciept, duration, russian_name ),
+    getAllDiseases,
+    findDiseaseWithId,
+    getPlantsIdsFromReciept,
+    calculateTreatmentCourse )
 import Plants
   ( Plant(..),
     getAllPlants,
     findAllPlantsTreatingDisease,
-    showInformationAboutPlantFlow,
-    showSortedPlantsFlow )
-
+    getPlantsByIds,
+    findPlantWithId )
 import TryAgain ( tryAgain )
+import BeautyPrinter
+  ( printAllDiseases,
+    printTreatmentCourse,
+    printPlantsForDisease,
+    printAdditionalInfoAboutPlant, printSortedPlants )
+import Contraindications ( getContraindicationsByIds )
+import GrowingAreas ( getAreasByIds )
 
 -- Functions
 
 mainFlow :: IO ()
 mainFlow = do
+  clearScreen
+
   putStrLn "\n"
   putStrLn "Программа \"Аптека лекарственных растений\""
 
@@ -36,6 +50,7 @@ mainMenu = do
   putStrLn "1. Показать заболевания"
   putStrLn "2. Выход из программы"
 
+  hFlush stdout
   decision <- getLine
 
   case decision of
@@ -45,9 +60,13 @@ mainMenu = do
 
 
 showAllDiseasesFlow :: IO ()
-showAllDiseasesFlow = do 
+showAllDiseasesFlow = do
+  clearScreen
+
+  putStrLn "Список заболеваний:\n"
+
   allDiseases <- getAllDiseases
-  uprint allDiseases
+  printAllDiseases allDiseases
 
   diseasesMenu
 
@@ -74,6 +93,38 @@ diseasesMenu = do
     _ -> tryAgain mainMenu
 
 
+calculateTreatmentCourseFlow :: IO ()
+calculateTreatmentCourseFlow = do
+  putStrLn "Введите id заболевания:"
+
+  hFlush stdout
+  decision <- getLine
+
+  let diseaseId = readMaybe decision :: Maybe Int
+  case diseaseId of
+    Just realDiseaseId -> tryCalculateTreatmentCourseFlow realDiseaseId
+
+    Nothing -> do
+      putStrLn "Введите число"
+      calculateTreatmentCourseFlow
+
+
+tryCalculateTreatmentCourseFlow :: Int -> IO ()
+tryCalculateTreatmentCourseFlow diseaseId = do
+  maybeDisease <- findDiseaseWithId diseaseId
+
+  case maybeDisease of
+    Just disease -> do
+      let plantsIds = getPlantsIdsFromReciept $ reciept disease
+      healthyPlants <- getPlantsByIds plantsIds
+
+      let treatmentCourseCost = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
+      printTreatmentCourse healthyPlants (reciept disease) treatmentCourseCost (duration disease)
+
+    Nothing -> do
+      putStrLn "Болезни с таким id не существует"
+
+
 requestShowPlantsTreatingDiseaseFlow :: IO ()
 requestShowPlantsTreatingDiseaseFlow = do
   putStrLn "Введите id заболевания:"
@@ -91,7 +142,8 @@ requestShowPlantsTreatingDiseaseFlow = do
 
 plantsMenu :: [Plant] -> IO ()
 plantsMenu plantsTreatingDisease = do
-  putStrLn "\nМеню:"
+  putStrLn "\n"
+  putStrLn "Меню:"
   putStrLn "1. Показать полную информацию о растении"
   putStrLn "2. Отсортировать растения по цене"
   putStrLn "3. Отсортировать растения по ареалу произрастания"
@@ -108,12 +160,12 @@ plantsMenu plantsTreatingDisease = do
 
     "2" -> do
       let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
+      showSortedPlantsFlow compareCondition plantsTreatingDisease "Сортировка по цене"
       plantsMenu plantsTreatingDisease
 
     "3" -> do
       let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
+      showSortedPlantsFlow compareCondition plantsTreatingDisease "Сортировка по ареалу"
       plantsMenu plantsTreatingDisease
 
     "4" -> showAllDiseasesFlow
@@ -126,7 +178,55 @@ showPlantsTreatingDiseaseFlow :: Int -> IO ()
 showPlantsTreatingDiseaseFlow diseaseId = do
   allPlants <- getAllPlants
 
-  let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
-  uprint plantsTreatingDisease
+  disease <- findDiseaseWithId diseaseId
 
-  plantsMenu plantsTreatingDisease
+  case disease of
+    Just realDisease -> do
+      let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
+      printPlantsForDisease plantsTreatingDisease (Diseases.russian_name realDisease)
+
+      plantsMenu plantsTreatingDisease
+
+    Nothing -> do
+      putStrLn "Такой болезни не найдено"
+      plantsMenu []
+
+
+showInformationAboutPlantFlow :: [Plant] -> IO ()
+showInformationAboutPlantFlow plantsTreatingDisease = do
+  putStrLn "Введите id растения:\n"
+
+  decision <- getLine
+
+  let plantId = readMaybe decision :: Maybe Int
+  case plantId of
+    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
+    Nothing -> do
+      putStrLn "Введите число"
+      showInformationAboutPlantFlow plantsTreatingDisease
+
+
+tryShowInformationAboutPlantFlow :: Int -> IO ()
+tryShowInformationAboutPlantFlow plantId = do
+  maybePlant <- findPlantWithId plantId
+
+  case maybePlant of
+    Just plant -> do
+      clearScreen
+
+      plantContraindications <- getContraindicationsByIds $ contraindications plant
+      plantGrowingAreas <- getAreasByIds $ growing_area plant
+      printAdditionalInfoAboutPlant
+        plant
+        [contras | Just contras <- plantContraindications]
+        [areas | Just areas <- plantGrowingAreas]
+
+    Nothing -> do
+      putStrLn "Растения с таким id не существует"
+      plantsMenu []
+
+
+showSortedPlantsFlow :: (Plant -> Plant -> Ordering) -> [Plant] -> String -> IO ()
+showSortedPlantsFlow compareCondition plantsTreatingDisease message = do
+  let sortedPlants = sortBy compareCondition plantsTreatingDisease
+  printSortedPlants sortedPlants message

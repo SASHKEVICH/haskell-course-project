@@ -1,8 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Diseases (
-  getAllDiseases
-  , calculateTreatmentCourseFlow
+  Disease(..)
+  , RecieptItem (..)
+  , Reciept
+  , getAllDiseases
+  , findDiseaseWithId
+  , getPlantsIdsFromReciept
+  , calculateTreatmentCourse
 ) where
 
 -- Imports
@@ -11,11 +16,9 @@ import Prelude hiding ( id )
 import Data.Aeson
 import Data.List ( find )
 import GHC.Generics ( Generic )
-import Text.Show.Unicode ( uprint, ushow )
-import Text.Read
 
 import GetJSON ( decodeJson )
-import Plants ( Plant(..), getPlantsByIds )
+import Plants ( Plant( price ) )
 
 -- Declarations
 
@@ -55,40 +58,6 @@ getAllDiseases = do
   case decodedDiseasesJSON of
     Just diseasesJson -> return $ diseases diseasesJson
     Nothing -> return []
-
-
-calculateTreatmentCourseFlow :: IO ()
-calculateTreatmentCourseFlow = do
-  putStrLn "Введите id заболевания:"
-
-  decision <- getLine
-
-  let diseaseId = readMaybe decision :: Maybe Int
-  case diseaseId of
-    Just realDiseaseId -> tryCalculateTreatmentCourseFlow realDiseaseId
-
-    Nothing -> do
-      putStrLn "Введите число"
-      calculateTreatmentCourseFlow
-
-
-tryCalculateTreatmentCourseFlow :: Int -> IO ()
-tryCalculateTreatmentCourseFlow diseaseId = do
-  maybeDisease <- findDiseaseWithId diseaseId
-
-  case maybeDisease of 
-    Just disease -> do
-      let plantsIds = getPlantsIdsFromReciept $ reciept disease
-      healthyPlants <- getPlantsByIds plantsIds
-
-      let treatmentCourcePrice = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
-
-      putStrLn "Лекарственные растения:\n"
-      uprint $ ushow healthyPlants
-      uprint $ "Стоимость: " ++ show treatmentCourcePrice ++ " усл/ед"
-    
-    Nothing -> do
-      putStrLn "Болезни с таким id не существует"
 
 
 findDiseaseWithId :: Int -> IO (Maybe Disease)

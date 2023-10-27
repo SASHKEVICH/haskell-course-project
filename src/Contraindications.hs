@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module Contraindications (
-  getContraindicationsByIds
+  Contraindication(..)
+  , getContraindicationsByIds
 ) where
 
 -- Imports

@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveGeneric #-}
 
 module GrowingAreas (
-  getAreasByIds
+  GrowingArea(..)
+  , getAreasByIds
 ) where
 
 -- Imports

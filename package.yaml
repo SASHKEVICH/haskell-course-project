@@ -25,6 +25,8 @@ dependencies:
 - aeson
 - unicode-show
 - ansi-terminal
+- pretty-simple
+- text
 
 ghc-options:
 - -Wall
