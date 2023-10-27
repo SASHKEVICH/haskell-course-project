@@ -6,7 +6,7 @@ module FullFlow (
 
 import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
-import Text.Read
+import Text.Read ( readMaybe )
 import System.Console.ANSI ( clearScreen )
 
 import Diseases
@@ -19,11 +19,17 @@ import Plants
   ( Plant(..),
     getAllPlants,
     findAllPlantsTreatingDisease,
-    showInformationAboutPlantFlow,
     showSortedPlantsFlow,
-    getPlantsByIds )
+    getPlantsByIds,
+    findPlantWithId )
 import TryAgain ( tryAgain )
-import BeautyPrinter ( printAllDiseases, printTreatmentCourse, printPlantsForDisease )
+import BeautyPrinter
+  ( printAllDiseases,
+    printTreatmentCourse,
+    printPlantsForDisease,
+    printAdditionalInfoAboutPlant )
+import Contraindications ( getContraindicationsByIds )
+import GrowingAreas ( getAreasByIds )
 
 -- Functions
 
@@ -167,6 +173,7 @@ plantsMenu plantsTreatingDisease = do
     "6" -> exitSuccess
     _ -> tryAgain $ plantsMenu plantsTreatingDisease
 
+
 showPlantsTreatingDiseaseFlow :: Int -> IO ()
 showPlantsTreatingDiseaseFlow diseaseId = do
   allPlants <- getAllPlants
@@ -182,4 +189,38 @@ showPlantsTreatingDiseaseFlow diseaseId = do
 
     Nothing -> do
       putStrLn "Такой болезни не найдено"
+      plantsMenu []
+
+
+showInformationAboutPlantFlow :: [Plant] -> IO ()
+showInformationAboutPlantFlow plantsTreatingDisease = do
+  putStrLn "Введите id растения:\n"
+
+  decision <- getLine
+
+  let plantId = readMaybe decision :: Maybe Int
+  case plantId of
+    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
+    Nothing -> do
+      putStrLn "Введите число"
+      showInformationAboutPlantFlow plantsTreatingDisease
+
+
+tryShowInformationAboutPlantFlow :: Int -> IO ()
+tryShowInformationAboutPlantFlow plantId = do
+  maybePlant <- findPlantWithId plantId
+
+  case maybePlant of
+    Just plant -> do
+      clearScreen
+
+      plantContraindications <- getContraindicationsByIds $ contraindications plant
+      plantGrowingAreas <- getAreasByIds $ growing_area plant
+      printAdditionalInfoAboutPlant
+        plant
+        [contras | Just contras <- plantContraindications]
+        [areas | Just areas <- plantGrowingAreas]
+
+    Nothing -> do
+      putStrLn "Растения с таким id не существует"
       plantsMenu []

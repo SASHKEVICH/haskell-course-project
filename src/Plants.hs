@@ -5,8 +5,8 @@ module Plants (
   , getPlantsByIds
   , getAllPlants
   , findAllPlantsTreatingDisease
-  , showInformationAboutPlantFlow
   , showSortedPlantsFlow
+  , findPlantWithId
 ) where
 
 -- Imports
@@ -16,11 +16,8 @@ import Data.List ( find, sortBy )
 import Data.Aeson
 import GHC.Generics
 import Text.Show.Unicode ( uprint, ushow )
-import Text.Read
 
 import GetJSON ( decodeJson )
-import Contraindications ( getContraindicationsByIds )
-import GrowingAreas ( getAreasByIds )
 
 -- Declarations
 
@@ -77,36 +74,36 @@ findAllPlantsTreatingDisease allPlants diseaseId =
     doesPlantTreatDisease plant = elem diseaseId $ diseases plant
 
 
-showInformationAboutPlantFlow :: [Plant] -> IO ()
-showInformationAboutPlantFlow plantsTreatingDisease = do
-  putStrLn "Введите id растения:\n"
+-- showInformationAboutPlantFlow :: [Plant] -> IO ()
+-- showInformationAboutPlantFlow plantsTreatingDisease = do
+--   putStrLn "Введите id растения:\n"
 
-  decision <- getLine
+--   decision <- getLine
 
-  let plantId = readMaybe decision :: Maybe Int
-  case plantId of
-    Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
-    Nothing -> do
-      putStrLn "Введите число"
-      showInformationAboutPlantFlow plantsTreatingDisease
+--   let plantId = readMaybe decision :: Maybe Int
+--   case plantId of
+--     Just realPlantId -> tryShowInformationAboutPlantFlow realPlantId
+--     Nothing -> do
+--       putStrLn "Введите число"
+--       showInformationAboutPlantFlow plantsTreatingDisease
 
 
-tryShowInformationAboutPlantFlow :: Int -> IO ()
-tryShowInformationAboutPlantFlow plantId = do
-  maybePlant <- findPlantWithId plantId
+-- tryShowInformationAboutPlantFlow :: Int -> IO ()
+-- tryShowInformationAboutPlantFlow plantId = do
+--   maybePlant <- findPlantWithId plantId
 
-  case maybePlant of
-    Just plant -> do
-      uprint $ "Искомое растение: " ++ ushow plant
+--   case maybePlant of
+--     Just plant -> do
+--       uprint $ "Искомое растение: " ++ ushow plant
 
-      plantContraindications <- getContraindicationsByIds $ contraindications plant
-      uprint $ "Противопоказания: " ++ ushow plantContraindications
+--       plantContraindications <- getContraindicationsByIds $ contraindications plant
+--       uprint $ "Противопоказания: " ++ ushow plantContraindications
 
-      plantGrowingAreas <- getAreasByIds $ growing_area plant
-      uprint $ "Ареалы произрастания: " ++ ushow plantGrowingAreas
+--       plantGrowingAreas <- getAreasByIds $ growing_area plant
+--       uprint $ "Ареалы произрастания: " ++ ushow plantGrowingAreas
 
-    Nothing -> do
-      putStrLn "Растения с таким id не существует"
+--     Nothing -> do
+--       putStrLn "Растения с таким id не существует"
 
 
 findPlantWithId :: Int -> IO (Maybe Plant)
