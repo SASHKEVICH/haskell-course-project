@@ -114,7 +114,7 @@ tryCalculateTreatmentCourseFlow diseaseId = do
       healthyPlants <- getPlantsByIds plantsIds
 
       let treatmentCourseCost = calculateTreatmentCourse (reciept disease) healthyPlants (duration disease)
-      printTreatmentCourse healthyPlants treatmentCourseCost (duration disease)
+      printTreatmentCourse healthyPlants (reciept disease) treatmentCourseCost (duration disease)
 
     Nothing -> do
       putStrLn "Болезни с таким id не существует"

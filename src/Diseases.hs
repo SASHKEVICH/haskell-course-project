@@ -2,6 +2,8 @@
 
 module Diseases (
   Disease(..)
+  , RecieptItem (..)
+  , Reciept
   , getAllDiseases
   , findDiseaseWithId
   , getPlantsIdsFromReciept

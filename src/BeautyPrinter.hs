@@ -19,11 +19,14 @@ printAllDiseases diseases = do
     in mapM_ pPrint printableDiseases
 
 
-printTreatmentCourse :: [Maybe Plants.Plant] -> Float -> Int -> IO ()
-printTreatmentCourse plants treatmentCost treatmentDuration = do
-  putStrLn "Лекарственные растения:\n"
+printTreatmentCourse :: [Maybe Plants.Plant] -> Diseases.Reciept -> Float -> Int -> IO ()
+printTreatmentCourse plants reciept treatmentCost treatmentDuration = do
+  putStrLn "\n"
+  putStrLn "Рецепт:"
 
-  let printablePlants = [printTreatmentPlantsClosure plant | Just plant <- plants]
+  let zipPlantsReciept = zip [plant | Just plant <- plants] reciept
+
+  let printablePlants = [printTreatmentPlantsClosure plantRecieptItem | plantRecieptItem <- zipPlantsReciept]
     in mapM_ pPrint printablePlants
 
   putStrLn $ "Длительность курса: " ++ show treatmentDuration ++ " дней"
@@ -42,13 +45,15 @@ printDiseasesClosure originalDisease =
       latinInterpretation disease = "Латинское название: " ++ Diseases.latin_name disease
 
 
-printTreatmentPlantsClosure :: Plants.Plant -> String
-printTreatmentPlantsClosure originalPlant =
+printTreatmentPlantsClosure :: (Plants.Plant, Diseases.RecieptItem) -> String
+printTreatmentPlantsClosure originalPlantRecieptItem =
   "\n"
    ++ "id: "
-   ++ show ( Plants.id originalPlant ) ++ "\n"
-   ++ russianInterpretation originalPlant ++ "\n"
-   ++ plantPrice originalPlant ++ "\n"
+   ++ show ( Plants.id $ fst originalPlantRecieptItem ) ++ "\n"
+   ++ russianInterpretation (fst originalPlantRecieptItem) ++ "\n"
+   ++ plantAmount originalPlantRecieptItem ++ "\n"
+   ++ plantPrice (fst originalPlantRecieptItem) ++ "\n"
     where
       russianInterpretation plant = "Русское название: " ++ Plants.russian_name plant
+      plantAmount plantRecieptItem = "Количество: " ++ show (Diseases.amount (snd plantRecieptItem)) ++ " пачки"
       plantPrice plant = "Цена: " ++ show (Plants.price plant) ++ " усл/ед"
