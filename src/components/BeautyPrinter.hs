@@ -3,6 +3,7 @@ module BeautyPrinter (
   , printTreatmentCourse
   , printPlantsForDisease
   , printAdditionalInfoAboutPlant
+  , printSortedPlants
 ) where
 
 -- Imports 
@@ -37,13 +38,18 @@ printTreatmentCourse plants reciept treatmentCost treatmentDuration = do
   pPrint $ "Стоимость: " ++ show treatmentCost ++ " усл/ед"
 
 
+printPlants :: [Plants.Plant] -> IO ()
+printPlants plants = do
+  let printablePlants = Prelude.map printPlantsForDiseaseClosure plants
+    in mapM_ pPrint printablePlants
+
+
 printPlantsForDisease :: [Plants.Plant] -> String -> IO ()
 printPlantsForDisease plants diseaseName = do
   putStrLn "\n"
   putStrLn $ "---Лекарственные растения для заболевания " ++ diseaseName
 
-  let printablePlants = Prelude.map printPlantsForDiseaseClosure plants
-    in mapM_ pPrint printablePlants
+  printPlants plants
 
 
 printAdditionalInfoAboutPlant
@@ -62,7 +68,12 @@ printAdditionalInfoAboutPlant plant contraindications growingAreas = do
   putStrLn "---Ареалы произрастания:"
   printStuff printGrowingAreasClosure growingAreas
 
-  putStrLn ""
+
+printSortedPlants :: [Plants.Plant] -> String -> IO ()
+printSortedPlants plants message = do
+  putStrLn "\n"
+  putStrLn message
+  printPlants plants
 
 
 printDiseasesClosure :: Diseases.Disease -> String

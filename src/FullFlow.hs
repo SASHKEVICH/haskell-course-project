@@ -8,6 +8,7 @@ import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
 import Text.Read ( readMaybe )
 import System.Console.ANSI ( clearScreen )
+import Data.List ( sortBy )
 
 import Diseases
   ( Disease( reciept, duration, russian_name ),
@@ -19,7 +20,6 @@ import Plants
   ( Plant(..),
     getAllPlants,
     findAllPlantsTreatingDisease,
-    showSortedPlantsFlow,
     getPlantsByIds,
     findPlantWithId )
 import TryAgain ( tryAgain )
@@ -27,7 +27,7 @@ import BeautyPrinter
   ( printAllDiseases,
     printTreatmentCourse,
     printPlantsForDisease,
-    printAdditionalInfoAboutPlant )
+    printAdditionalInfoAboutPlant, printSortedPlants )
 import Contraindications ( getContraindicationsByIds )
 import GrowingAreas ( getAreasByIds )
 
@@ -160,12 +160,12 @@ plantsMenu plantsTreatingDisease = do
 
     "2" -> do
       let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
+      showSortedPlantsFlow compareCondition plantsTreatingDisease "Сортировка по цене"
       plantsMenu plantsTreatingDisease
 
     "3" -> do
       let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease
+      showSortedPlantsFlow compareCondition plantsTreatingDisease "Сортировка по ареалу"
       plantsMenu plantsTreatingDisease
 
     "4" -> showAllDiseasesFlow
@@ -224,3 +224,9 @@ tryShowInformationAboutPlantFlow plantId = do
     Nothing -> do
       putStrLn "Растения с таким id не существует"
       plantsMenu []
+
+
+showSortedPlantsFlow :: (Plant -> Plant -> Ordering) -> [Plant] -> String -> IO ()
+showSortedPlantsFlow compareCondition plantsTreatingDisease message = do
+  let sortedPlants = sortBy compareCondition plantsTreatingDisease
+  printSortedPlants sortedPlants message

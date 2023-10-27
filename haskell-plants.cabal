@@ -25,12 +25,12 @@ source-repository head
 
 library
   exposed-modules:
-      BeautyPrinter
       Contraindications
       Diseases
       FullFlow
       GrowingAreas
       Plants
+      BeautyPrinter
       GetJSON
       TryAgain
   other-modules:
