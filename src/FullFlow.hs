@@ -6,12 +6,11 @@ module FullFlow (
 
 import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
-import Text.Show.Unicode ( uprint )
 import Text.Read
 import System.Console.ANSI ( clearScreen )
 
 import Diseases
-  ( Disease( reciept, duration ),
+  ( Disease( reciept, duration, russian_name ),
     getAllDiseases,
     findDiseaseWithId,
     getPlantsIdsFromReciept,
@@ -24,7 +23,7 @@ import Plants
     showSortedPlantsFlow,
     getPlantsByIds )
 import TryAgain ( tryAgain )
-import BeautyPrinter ( printAllDiseases, printTreatmentCourse )
+import BeautyPrinter ( printAllDiseases, printTreatmentCourse, printPlantsForDisease )
 
 -- Functions
 
@@ -137,7 +136,8 @@ requestShowPlantsTreatingDiseaseFlow = do
 
 plantsMenu :: [Plant] -> IO ()
 plantsMenu plantsTreatingDisease = do
-  putStrLn "\nМеню:"
+  putStrLn "\n"
+  putStrLn "Меню:"
   putStrLn "1. Показать полную информацию о растении"
   putStrLn "2. Отсортировать растения по цене"
   putStrLn "3. Отсортировать растения по ареалу произрастания"
@@ -167,12 +167,19 @@ plantsMenu plantsTreatingDisease = do
     "6" -> exitSuccess
     _ -> tryAgain $ plantsMenu plantsTreatingDisease
 
-
 showPlantsTreatingDiseaseFlow :: Int -> IO ()
 showPlantsTreatingDiseaseFlow diseaseId = do
   allPlants <- getAllPlants
 
-  let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
-  uprint plantsTreatingDisease
+  disease <- findDiseaseWithId diseaseId
 
-  plantsMenu plantsTreatingDisease
+  case disease of
+    Just realDisease -> do
+      let plantsTreatingDisease = findAllPlantsTreatingDisease allPlants diseaseId
+      printPlantsForDisease plantsTreatingDisease (Diseases.russian_name realDisease)
+
+      plantsMenu plantsTreatingDisease
+
+    Nothing -> do
+      putStrLn "Такой болезни не найдено"
+      plantsMenu []

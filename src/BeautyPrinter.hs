@@ -1,6 +1,7 @@
 module BeautyPrinter (
   printAllDiseases
   , printTreatmentCourse
+  , printPlantsForDisease
 ) where
 
 -- Imports 
@@ -29,8 +30,18 @@ printTreatmentCourse plants reciept treatmentCost treatmentDuration = do
   let printablePlants = [printTreatmentPlantsClosure plantRecieptItem | plantRecieptItem <- zipPlantsReciept]
     in mapM_ pPrint printablePlants
 
-  putStrLn $ "Длительность курса: " ++ show treatmentDuration ++ " дней"
-  putStrLn $ "Стоимость: " ++ show treatmentCost ++ " усл/ед"
+  pPrint $ "Длительность курса: " ++ show treatmentDuration ++ " дней"
+  pPrint $ "Стоимость: " ++ show treatmentCost ++ " усл/ед"
+
+
+printPlantsForDisease :: [Plants.Plant] -> String -> IO ()
+printPlantsForDisease plants diseaseName = do
+  putStrLn "\n"
+  putStrLn $ "Лекарственные растения для заболевания " ++ diseaseName
+  putStrLn "\n"
+
+  let printablePlants = map printPlantsForDiseaseClosure plants
+    in mapM_ pPrint printablePlants
 
 
 printDiseasesClosure :: Diseases.Disease -> String
@@ -56,4 +67,18 @@ printTreatmentPlantsClosure originalPlantRecieptItem =
     where
       russianInterpretation plant = "Русское название: " ++ Plants.russian_name plant
       plantAmount plantRecieptItem = "Количество: " ++ show (Diseases.amount (snd plantRecieptItem)) ++ " пачки"
+      plantPrice plant = "Цена: " ++ show (Plants.price plant) ++ " усл/ед"
+
+
+printPlantsForDiseaseClosure :: Plants.Plant -> String
+printPlantsForDiseaseClosure originalPlant =
+  "\n"
+   ++ "id: "
+   ++ show ( Plants.id originalPlant ) ++ "\n"
+   ++ russianInterpretation originalPlant ++ "\n"
+   ++ latinInterpretation originalPlant ++ "\n"
+   ++ plantPrice originalPlant ++ "\n"
+    where
+      russianInterpretation plant = "Русское название: " ++ Plants.russian_name plant
+      latinInterpretation plant = "Латинское название: " ++ Plants.latin_name plant
       plantPrice plant = "Цена: " ++ show (Plants.price plant) ++ " усл/ед"
