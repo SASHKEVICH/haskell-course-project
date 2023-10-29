@@ -13,6 +13,7 @@ import Data.Aeson
 import Data.List ( find )
 
 import GetJSON ( decodeJson )
+import FromJust ( fromJust )
 
 -- Declararations
 
@@ -45,13 +46,13 @@ getAllContraindications = do
     Nothing -> return []
 
 
-getContraindicationsByIds :: [Int] -> IO [Maybe Contraindication]
+getContraindicationsByIds :: [Int] -> IO [Contraindication]
 getContraindicationsByIds ids = do
   allContraindications <- getAllContraindications
   return $ findContraindicationsByIds allContraindications ids
 
 
-findContraindicationsByIds :: [Contraindication] -> [Int] -> [Maybe Contraindication]
+findContraindicationsByIds :: [Contraindication] -> [Int] -> [Contraindication]
 findContraindicationsByIds allContraindications ids =
-  [ find (\contraindication -> id contraindication == contraindicationId) allContraindications | contraindicationId <- ids ]
+  [ fromJust $ find (\contraindication -> id contraindication == contraindicationId) allContraindications | contraindicationId <- ids ]
 
