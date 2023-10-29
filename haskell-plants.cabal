@@ -31,7 +31,9 @@ library
       GrowingAreas
       Plants
       BeautyPrinter
+      FromJust
       GetJSON
+      ReadDecision
       TryAgain
   other-modules:
       Paths_haskell_plants

@@ -4,7 +4,6 @@ module FullFlow (
 
 -- Imports
 
-import System.IO ( hFlush, stdout )
 import System.Exit ( exitSuccess )
 import Text.Read ( readMaybe )
 import System.Console.ANSI ( clearScreen )
@@ -29,7 +28,8 @@ import BeautyPrinter
     printPlantsForDisease,
     printAdditionalInfoAboutPlant, printSortedPlants )
 import Contraindications ( getContraindicationsByIds )
-import GrowingAreas ( getAreasByIds )
+import GrowingAreas ( GrowingArea (russian_name), getAreasByIds, getAllAreas, findAreasByIds )
+import ReadDecision ( readDecision )
 
 -- Functions
 
@@ -50,8 +50,7 @@ mainMenu = do
   putStrLn "1. Показать заболевания"
   putStrLn "2. Выход из программы"
 
-  hFlush stdout
-  decision <- getLine
+  decision <- readDecision
 
   case decision of
     "1" -> showAllDiseasesFlow
@@ -80,7 +79,7 @@ diseasesMenu = do
   putStrLn "4. Выйти в начало"
   putStrLn "5. Выйти из программы"
 
-  decision <- getLine
+  decision <- readDecision
 
   case decision of
     "1" -> requestShowPlantsTreatingDiseaseFlow
@@ -97,8 +96,7 @@ calculateTreatmentCourseFlow :: IO ()
 calculateTreatmentCourseFlow = do
   putStrLn "Введите id заболевания:"
 
-  hFlush stdout
-  decision <- getLine
+  decision <- readDecision
 
   let diseaseId = readMaybe decision :: Maybe Int
   case diseaseId of
@@ -129,7 +127,7 @@ requestShowPlantsTreatingDiseaseFlow :: IO ()
 requestShowPlantsTreatingDiseaseFlow = do
   putStrLn "Введите id заболевания:"
 
-  decision <- getLine
+  decision <- readDecision
 
   let diseaseId = readMaybe decision :: Maybe Int
   case diseaseId of
@@ -151,7 +149,7 @@ plantsMenu plantsTreatingDisease = do
   putStrLn "5. Выйти в начало"
   putStrLn "6. Выйти из программы"
 
-  decision <- getLine
+  decision <- readDecision
 
   case decision of
     "1" -> do
@@ -164,8 +162,7 @@ plantsMenu plantsTreatingDisease = do
       plantsMenu plantsTreatingDisease
 
     "3" -> do
-      let compareCondition lt rt = if price lt > price rt then GT else LT
-      showSortedPlantsFlow compareCondition plantsTreatingDisease "Сортировка по ареалу"
+      sortByGrowingAreaFlow plantsTreatingDisease
       plantsMenu plantsTreatingDisease
 
     "4" -> showAllDiseasesFlow
@@ -194,9 +191,9 @@ showPlantsTreatingDiseaseFlow diseaseId = do
 
 showInformationAboutPlantFlow :: [Plant] -> IO ()
 showInformationAboutPlantFlow plantsTreatingDisease = do
-  putStrLn "Введите id растения:\n"
+  putStrLn "Введите id растения:"
 
-  decision <- getLine
+  decision <- readDecision
 
   let plantId = readMaybe decision :: Maybe Int
   case plantId of
@@ -218,8 +215,8 @@ tryShowInformationAboutPlantFlow plantId = do
       plantGrowingAreas <- getAreasByIds $ growing_area plant
       printAdditionalInfoAboutPlant
         plant
-        [contras | Just contras <- plantContraindications]
-        [areas | Just areas <- plantGrowingAreas]
+        plantContraindications
+        plantGrowingAreas
 
     Nothing -> do
       putStrLn "Растения с таким id не существует"
@@ -230,3 +227,44 @@ showSortedPlantsFlow :: (Plant -> Plant -> Ordering) -> [Plant] -> String -> IO 
 showSortedPlantsFlow compareCondition plantsTreatingDisease message = do
   let sortedPlants = sortBy compareCondition plantsTreatingDisease
   printSortedPlants sortedPlants message
+
+
+sortByGrowingAreaFlow :: [Plant] -> IO()
+sortByGrowingAreaFlow plants = do
+  putStrLn "Выберите способ сортировки по ареалу:"
+  putStrLn "1. По первому ареалу произрастания растения"
+  putStrLn "2. По количеству ареалов произрастания растения"
+
+  decision <- readDecision
+
+  case decision of
+    "1" -> sortPlantsByGrowingArea plants
+    "2" -> do
+      let compareCondition lt rt = if length (growing_area lt) > length (growing_area rt) then GT else LT
+      showSortedPlantsFlow compareCondition plants "---Сортировка по количеству ареалов"
+
+    _ -> plantsMenu plants
+
+
+sortPlantsByGrowingArea :: [Plant] -> IO ()
+sortPlantsByGrowingArea plants = do
+  areasWithEachPlant <- zipGrowingAreasWithEachPlant plants
+  let sortedPlants = sortBy sortPlantsByFirstAreaCondition areasWithEachPlant
+  let printablePlants = [fst plant | plant <- sortedPlants]
+
+  printSortedPlants printablePlants "---Сортировка по первому ареалу"
+
+
+zipGrowingAreasWithEachPlant:: [Plant] -> IO [(Plant, [GrowingArea])]
+zipGrowingAreasWithEachPlant plants = do
+  allAreas <- getAllAreas
+  let areasGroupedByPlants = [ findAreasByIds allAreas (growing_area plant) | plant <- plants ]
+  return $ zip plants areasGroupedByPlants
+
+
+sortPlantsByFirstAreaCondition :: (Plant, [GrowingArea]) -> (Plant, [GrowingArea]) -> Ordering
+sortPlantsByFirstAreaCondition lt rt
+  | char lt > char rt = GT
+  | otherwise = LT
+  where
+    char element = head $ GrowingAreas.russian_name (head (snd element))

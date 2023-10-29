@@ -2,7 +2,10 @@
 
 module GrowingAreas (
   GrowingArea(..)
+  , getAllAreas
   , getAreasByIds
+  , sortByFirstGrowingAreaCondition
+  , findAreasByIds
 ) where
 
 -- Imports
@@ -12,6 +15,7 @@ import GHC.Generics
 import Data.Aeson
 import Data.List ( find )
 
+import FromJust ( fromJust )
 import GetJSON ( decodeJson )
 
 -- Declararations
@@ -39,20 +43,24 @@ jsonFile = "./db/growing_areas.json"
 
 getAllAreas :: IO [GrowingArea]
 getAllAreas = do
-  decodedAreasJSON <- decodeJson jsonFile :: IO(Maybe GrowingAreasJSON)
+  decodedAreasJSON <- decodeJson jsonFile :: IO (Maybe GrowingAreasJSON)
 
   case decodedAreasJSON of
     Just areasJSON -> return $ growing_areas areasJSON
     Nothing -> return []
 
 
-getAreasByIds :: [Int] -> IO [Maybe GrowingArea]
+getAreasByIds :: [Int] -> IO [GrowingArea]
 getAreasByIds ids = do
   allAreas <- getAllAreas
   return $ findAreasByIds allAreas ids
 
 
-findAreasByIds :: [GrowingArea] -> [Int] -> [Maybe GrowingArea]
-findAreasByIds allAreas ids =
-  [ find (\area -> id area == areaId) allAreas | areaId <- ids ]
+findAreasByIds :: [GrowingArea] -> [Int] -> [GrowingArea]
+findAreasByIds allAreas ids = [ fromJust (find (\area -> id area == areaId) allAreas) | areaId <- ids ]
 
+
+sortByFirstGrowingAreaCondition :: GrowingArea -> GrowingArea -> Ordering
+sortByFirstGrowingAreaCondition lt rt
+  | russian_name lt > russian_name rt = GT
+  | otherwise = LT
