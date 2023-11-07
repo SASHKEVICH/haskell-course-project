@@ -29,15 +29,15 @@ data RecieptItem = Reciept
 
 type Reciept = [RecieptItem]
 
-data Disease = Disease 
+data Disease = Disease
   { id :: Int
   , russian_name :: String
   , latin_name :: String
   , reciept :: Reciept
-  , duration :: Int    
+  , duration :: Int
   } deriving (Show, Generic)
 
-newtype DiseasesJSON = DiseasesJSON 
+newtype DiseasesJSON = DiseasesJSON
   { diseases :: [Disease]
   } deriving (Show, Generic)
 
@@ -75,6 +75,11 @@ getPlantsIdsFromReciept recieptArray =
 
 calculateTreatmentCourse :: Reciept -> [Maybe Plant] -> Int -> Float
 calculateTreatmentCourse recieptArray recieptPlants treatmentDuration =
-  foldl (\acc x -> fromIntegral (fst x) * snd x + acc) 0.0 priceAmountArray * fromIntegral treatmentDuration
-  where 
-    priceAmountArray = zip [ price plant | Just plant <- recieptPlants ] [ amount recieptItem | recieptItem <- recieptArray ]
+  foldl (\acc x -> fromIntegral (fst x) * fromIntegral (snd x) + acc) 0.0 priceAndPackAmountArray
+  where
+    priceAndPackAmountArray :: [(Int, Int)]
+    priceAndPackAmountArray =
+      zip
+      [ price plant | Just plant <- recieptPlants ]
+      [ wholePacksAmount recieptItem | recieptItem <- recieptArray ]
+    wholePacksAmount recieptItem = ceiling $ amount recieptItem * fromIntegral treatmentDuration
