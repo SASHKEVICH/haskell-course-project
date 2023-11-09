@@ -26,7 +26,9 @@ import BeautyPrinter
   ( printAllDiseases,
     printTreatmentCourse,
     printPlantsForDisease,
-    printAdditionalInfoAboutPlant, printSortedPlants )
+    printAdditionalInfoAboutPlant, 
+    printSortedPlants,
+    printSortedPlantsWithGrowingAreas )
 import Contraindications ( getContraindicationsByIds )
 import GrowingAreas ( GrowingArea (russian_name), getAreasByIds, getAllAreas, findAreasByIds )
 import ReadDecision ( readDecision )
@@ -237,22 +239,19 @@ sortByGrowingAreaFlow plants = do
 
   decision <- readDecision
 
+  areasWithEachPlant <- zipGrowingAreasWithEachPlant plants
+
   case decision of
-    "1" -> sortPlantsByGrowingArea plants
+    "1" -> do
+      let sortedPlants = sortBy sortPlantsByFirstAreaCondition areasWithEachPlant
+      printSortedPlantsWithGrowingAreas sortedPlants "---Сортировка по первому ареалу"
+
     "2" -> do
-      let compareCondition lt rt = if length (growing_area lt) > length (growing_area rt) then GT else LT
-      showSortedPlantsFlow compareCondition plants "---Сортировка по количеству ареалов"
+      let compareCondition lt rt = if length (growing_area $ fst lt) > length (growing_area $ fst rt) then GT else LT
+      let sortedPlants = sortBy compareCondition areasWithEachPlant
+      printSortedPlantsWithGrowingAreas sortedPlants "---Сортировка по количеству ареалов"
 
     _ -> plantsMenu plants
-
-
-sortPlantsByGrowingArea :: [Plant] -> IO ()
-sortPlantsByGrowingArea plants = do
-  areasWithEachPlant <- zipGrowingAreasWithEachPlant plants
-  let sortedPlants = sortBy sortPlantsByFirstAreaCondition areasWithEachPlant
-  let printablePlants = [fst plant | plant <- sortedPlants]
-
-  printSortedPlants printablePlants "---Сортировка по первому ареалу"
 
 
 zipGrowingAreasWithEachPlant:: [Plant] -> IO [(Plant, [GrowingArea])]

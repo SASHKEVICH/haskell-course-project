@@ -1,3 +1,5 @@
+.default=build
+
 build:
 	./db/db_validate.sh ./db
 	stack build

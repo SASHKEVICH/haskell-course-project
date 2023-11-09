@@ -4,6 +4,7 @@ module BeautyPrinter (
   , printPlantsForDisease
   , printAdditionalInfoAboutPlant
   , printSortedPlants
+  , printSortedPlantsWithGrowingAreas
 ) where
 
 -- Imports 
@@ -20,7 +21,7 @@ import qualified GrowingAreas
 -- Functions
 
 printAllDiseases :: [Diseases.Disease] -> IO ()
-printAllDiseases diseases = do printStuff printDiseasesClosure diseases
+printAllDiseases diseases = do printStuff printDiseasesTemplate diseases
 
 
 printTreatmentCourse :: [Maybe Plants.Plant] -> Diseases.Reciept -> Float -> Int -> IO ()
@@ -28,10 +29,10 @@ printTreatmentCourse plants reciept treatmentCost treatmentDuration = do
   putStrLn "\n"
   putStrLn "---Рецепт:"
 
-  let zipPlantsReciept = Prelude.zip [plant | Just plant <- plants] reciept
+  let zipPlantsReciept = zip [plant | Just plant <- plants] reciept
 
   printStuff
-    printTreatmentPlantsClosure
+    printTreatmentPlantsTemplate
     zipPlantsReciept
 
   pPrint $ "Длительность курса: " ++ show treatmentDuration ++ " дней"
@@ -40,7 +41,7 @@ printTreatmentCourse plants reciept treatmentCost treatmentDuration = do
 
 printPlants :: [Plants.Plant] -> IO ()
 printPlants plants = do
-  let printablePlants = Prelude.map printPlantsForDiseaseClosure plants
+  let printablePlants = map printPlantsForDiseaseTemplate plants
     in mapM_ pPrint printablePlants
 
 
@@ -58,15 +59,15 @@ printAdditionalInfoAboutPlant plant contraindications growingAreas = do
   putStrLn "\n"
   putStrLn $ "---Полная информация о растении " ++ Plants.russian_name plant
 
-  let printablePlant = printAdditionalInfoAboutPlantClosure plant
+  let printablePlant = printAdditionalInfoAboutPlantTemplate plant
     in pPrint printablePlant
 
   putStrLn "---Противопоказания:"
 
-  printStuff printContraindicationsClosure contraindications
+  printStuff printContraindicationsTemplate contraindications
 
   putStrLn "---Ареалы произрастания:"
-  printStuff printGrowingAreasClosure growingAreas
+  printStuff printGrowingAreasTemplate growingAreas
 
 
 printSortedPlants :: [Plants.Plant] -> String -> IO ()
@@ -76,15 +77,22 @@ printSortedPlants plants message = do
   printPlants plants
 
 
-printDiseasesClosure :: Diseases.Disease -> String
-printDiseasesClosure originalDisease =
+printSortedPlantsWithGrowingAreas :: [(Plants.Plant, [GrowingAreas.GrowingArea])] -> String -> IO ()
+printSortedPlantsWithGrowingAreas plantsWithGrowingAreas message = do
+  putStrLn "\n"
+  putStrLn message
+  printStuff printSortedPlantWithGrowingAreasTemplate plantsWithGrowingAreas
+
+
+printDiseasesTemplate :: Diseases.Disease -> String
+printDiseasesTemplate originalDisease =
   id Diseases.id originalDisease ++ "\n"
   ++ russianInterpretation Diseases.russian_name originalDisease ++ "\n"
   ++ latinInterpretation Diseases.latin_name originalDisease ++ "\n"
 
 
-printTreatmentPlantsClosure :: (Plants.Plant, Diseases.RecieptItem) -> String
-printTreatmentPlantsClosure originalPlantRecieptItem =
+printTreatmentPlantsTemplate :: (Plants.Plant, Diseases.RecieptItem) -> String
+printTreatmentPlantsTemplate originalPlantRecieptItem =
   id Plants.id (fst originalPlantRecieptItem) ++ "\n"
   ++ russianInterpretation Plants.russian_name (fst originalPlantRecieptItem) ++ "\n"
   ++ plantAmount originalPlantRecieptItem ++ "\n"
@@ -94,8 +102,8 @@ printTreatmentPlantsClosure originalPlantRecieptItem =
     plantPrice plant = "Цена: " ++ show (Plants.price plant) ++ " усл/ед"
 
 
-printPlantsForDiseaseClosure :: Plants.Plant -> String
-printPlantsForDiseaseClosure originalPlant =
+printPlantsForDiseaseTemplate :: Plants.Plant -> String
+printPlantsForDiseaseTemplate originalPlant =
   id Plants.id originalPlant ++ "\n"
   ++ russianInterpretation Plants.russian_name originalPlant ++ "\n"
   ++ latinInterpretation Plants.latin_name originalPlant ++ "\n"
@@ -104,8 +112,8 @@ printPlantsForDiseaseClosure originalPlant =
       plantPrice plant = "Цена: " ++ show (Plants.price plant) ++ " усл/ед"
 
 
-printAdditionalInfoAboutPlantClosure :: Plants.Plant -> String
-printAdditionalInfoAboutPlantClosure originalPlant =
+printAdditionalInfoAboutPlantTemplate :: Plants.Plant -> String
+printAdditionalInfoAboutPlantTemplate originalPlant =
   id Plants.id originalPlant ++ "\n"
   ++ russianInterpretation Plants.russian_name originalPlant ++ "\n"
   ++ latinInterpretation Plants.latin_name originalPlant ++ "\n"
@@ -116,19 +124,28 @@ printAdditionalInfoAboutPlantClosure originalPlant =
       additionalInfo plant = "Дополнительная информация:\n" ++ Plants.information plant
 
 
-printContraindicationsClosure :: Contraindications.Contraindication -> String
-printContraindicationsClosure originalContraindication =
+printContraindicationsTemplate :: Contraindications.Contraindication -> String
+printContraindicationsTemplate originalContraindication =
   id Contraindications.id originalContraindication
   ++ "\n"
   ++ russianInterpretation Contraindications.russian_name originalContraindication
   ++ "\n"
 
 
-printGrowingAreasClosure :: GrowingAreas.GrowingArea -> String
-printGrowingAreasClosure originalGrowingArea =
+printGrowingAreasTemplate :: GrowingAreas.GrowingArea -> String
+printGrowingAreasTemplate originalGrowingArea =
   id GrowingAreas.id originalGrowingArea ++ "\n"
   ++ russianInterpretation GrowingAreas.russian_name originalGrowingArea ++ "\n"
   ++ "Локация: " ++ GrowingAreas.location originalGrowingArea
+
+
+printSortedPlantWithGrowingAreasTemplate :: (Plants.Plant, [GrowingAreas.GrowingArea]) -> String
+printSortedPlantWithGrowingAreasTemplate plantWithAreasItem =
+  printPlantsForDiseaseTemplate (fst plantWithAreasItem)
+  ++ "\n"
+  ++ "Ареалы произрастания:"
+  ++ foldl (\acc grarea -> acc ++ printGrowingAreasTemplate grarea) "" (snd plantWithAreasItem)
+  ++ "\n------------------------------------------------\n"
 
 
 printStuff :: (a -> String) -> [a] -> IO ()
