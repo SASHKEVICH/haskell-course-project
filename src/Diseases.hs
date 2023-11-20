@@ -13,7 +13,7 @@ module Diseases (
 -- Imports
 
 import Prelude hiding ( id )
-import Data.Aeson
+import Data.Aeson ( FromJSON )
 import Data.List ( find )
 import GHC.Generics ( Generic )
 

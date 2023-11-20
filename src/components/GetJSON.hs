@@ -4,7 +4,7 @@ module GetJSON (
 
 -- Imports
 
-import Data.Aeson
+import Data.Aeson ( FromJSON, decode )
 import qualified Data.ByteString.Lazy as B
 
 -- Functions
@@ -16,4 +16,5 @@ getJSON = B.readFile
 decodeJson :: (FromJSON jsonType) => FilePath -> IO (Maybe jsonType)
 decodeJson jsonFilePath =
   decode <$> rawJson
-  where rawJson = getJSON jsonFilePath
+  where
+    rawJson = getJSON jsonFilePath
