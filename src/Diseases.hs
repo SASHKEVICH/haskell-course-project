@@ -64,8 +64,8 @@ findDiseaseWithId :: Int -> IO (Maybe Disease)
 findDiseaseWithId diseaseId = do
   allDiseases <- getAllDiseases
 
-  let filteredDiseases = find (\disease -> id disease == diseaseId) allDiseases
-  return filteredDiseases
+  let filteredDisease = find (\disease -> id disease == diseaseId) allDiseases
+  return filteredDisease
 
 
 getPlantsIdsFromReciept :: Reciept -> [Int]
@@ -80,6 +80,9 @@ calculateTreatmentCourse recieptArray recieptPlants treatmentDuration =
     priceAndPackAmountArray :: [(Int, Int)]
     priceAndPackAmountArray =
       zip
-      [ price plant | Just plant <- recieptPlants ]
-      [ wholePacksAmount recieptItem | recieptItem <- recieptArray ]
+        [ price plant | Just plant <- recieptPlants ]
+        [ wholePacksAmount recieptItem | recieptItem <- recieptArray ]
     wholePacksAmount recieptItem = ceiling $ amount recieptItem * fromIntegral treatmentDuration
+
+
+

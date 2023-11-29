@@ -254,7 +254,7 @@ sortByGrowingAreaFlow plants = do
     _ -> plantsMenu plants
 
 
-zipGrowingAreasWithEachPlant:: [Plant] -> IO [(Plant, [GrowingArea])]
+zipGrowingAreasWithEachPlant :: [Plant] -> IO [(Plant, [GrowingArea])]
 zipGrowingAreasWithEachPlant plants = do
   allAreas <- getAllAreas
   let areasGroupedByPlants = [ findAreasByIds allAreas (growing_area plant) | plant <- plants ]
